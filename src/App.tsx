@@ -2,13 +2,12 @@ import './App.css';
 import { Typography } from 'antd';
 const { Title } = Typography;
 
-function App() {
+const App: React.FC = () => {
   return (
     <>
-      <Title>Coins & Markets</Title>
+      <Title style={{ fontSize: '24px' }}>Coins & Markets</Title>
     </>
   );
-}
+};
 
 export default App;
-
