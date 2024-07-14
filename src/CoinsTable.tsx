@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Image, Flex, Typography } from 'antd';
-// import { Image } from 'antd';
 const columns = [
   {
     title: 'Name',
@@ -46,5 +45,19 @@ export const CoinsTable: React.FC = () => {
     fetchCryptos();
   }, []);
 
-  return <Table dataSource={cryptos} columns={columns} />;
+  return (
+    <Table
+      loading={isLoading}
+      dataSource={cryptos}
+      columns={columns}
+      pagination={{
+        defaultPageSize: 10,
+        showSizeChanger: true,
+        onChange: () => {
+          return console.log('test');
+        },
+        pageSizeOptions: ['5', '10', '20', '50', '100'],
+      }}
+    />
+  );
 };
