@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Table } from 'antd';
-
+import { Table, Image, Flex, Typography } from 'antd';
+// import { Image } from 'antd';
 const columns = [
   {
     title: 'Name',
-    dataIndex: 'name',
-    key: 'name',
+    dataIndex: 'image',
+    render: (theImageURL, data) => (
+      <Flex gap="middle" align="center">
+        <Image src={theImageURL} width={32} />
+        <Typography.Text>{data.name}</Typography.Text>
+      </Flex>
+    ),
   },
   {
     title: 'Current Price',
