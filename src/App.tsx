@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Typography, Flex, Select, Table, Image } from 'antd';
+import { Typography, Flex, Select, Table } from 'antd';
+import styled from 'styled-components';
+
 interface ICrypto {
   id: string;
   symbol: string;
@@ -33,6 +35,20 @@ interface ICrypto {
   last_updated: string;
 }
 
+const StyledImage = styled.img`
+  width: 32px;
+
+  @media (max-width: 767px) {
+    width: 24px;
+  }
+`;
+const StyledText = styled(Typography.Text)`
+  font-size: 14px;
+
+  @media (max-width: 767px) {
+    font-size: 12px;
+  }
+`;
 const App: React.FC = () => {
   const [cryptos, setCryptos] = useState<ICrypto>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -47,8 +63,8 @@ const App: React.FC = () => {
       dataIndex: 'image',
       render: (theImageURL, data) => (
         <Flex gap="middle" align="center">
-          <Image src={theImageURL} width={32} />
-          <Typography.Text>{data.name}</Typography.Text>
+          <StyledImage src={theImageURL} alt={data.name} />
+          <StyledText>{data.name}</StyledText>
         </Flex>
       ),
     },
@@ -57,9 +73,9 @@ const App: React.FC = () => {
       dataIndex: 'current_price',
       key: 'current_price',
       render: (price, data) => (
-        <Typography.Text>
+        <StyledText>
           {data.current_price} {currency}
-        </Typography.Text>
+        </StyledText>
       ),
     },
     {
@@ -82,14 +98,19 @@ const App: React.FC = () => {
           `https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currency}&order=market_cap_${sortOrder}&per_page=${pageSize}&page=${page}&sparkline=false`
         );
         const data = await response.json();
-        const dataWithKeys = data.map((item: ICrypto) => ({
-          ...item,
-          key: item.id,
-        }));
-        setCryptos(dataWithKeys);
+        if (Array.isArray(data)) {
+          const dataWithKeys = data.map((item: ICrypto) => ({
+            ...item,
+            key: item.id,
+          }));
+          setCryptos(dataWithKeys);
+        } else {
+          console.error('Expected an array but got:', data);
+          setIsError('Unexpected response format');
+        }
       } catch (error) {
-        setIsError(error);
-        alert(`Please try again later, server response is: ${isError}`);
+        setIsError(error.message);
+        console.error('Error fetching data:', error);
       } finally {
         setIsLoading(false);
       }
@@ -129,11 +150,11 @@ const App: React.FC = () => {
   };
 
   return (
-    <Flex gap={24} vertical>
+    <Flex gap="large" vertical>
       <Typography.Title style={{ fontSize: '24px', fontWeight: '400' }}>
         Coins & Markets
       </Typography.Title>
-      <Flex horizontal gap="middle">
+      <Flex gap="large" horizontal="true">
         <Select
           defaultValue="usd"
           style={{ width: 200 }}
