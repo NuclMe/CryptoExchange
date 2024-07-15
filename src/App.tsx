@@ -82,6 +82,9 @@ const App: React.FC = () => {
       title: 'Circulating Supply',
       dataIndex: 'circulating_supply',
       key: 'circulating_supply',
+      render: (circulating_supply) => (
+        <StyledText>{circulating_supply}</StyledText>
+      ),
     },
   ]);
 
@@ -128,9 +131,9 @@ const App: React.FC = () => {
       {
         ...prevColumns[1],
         render: (price, data) => (
-          <Typography.Text>
+          <StyledText>
             {data.current_price} {currency}
-          </Typography.Text>
+          </StyledText>
         ),
       },
       prevColumns[2],
