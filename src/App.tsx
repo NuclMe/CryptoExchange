@@ -34,7 +34,12 @@ interface ICrypto {
   } | null;
   last_updated: string;
 }
-
+interface ColumnType {
+  title: string;
+  dataIndex: string;
+  key?: string;
+  render?: (value: any, record: ICrypto) => JSX.Element;
+}
 const StyledImage = styled.img`
   width: 32px;
 
@@ -50,18 +55,18 @@ const StyledText = styled(Typography.Text)`
   }
 `;
 const App: React.FC = () => {
-  const [cryptos, setCryptos] = useState<ICrypto>([]);
+  const [cryptos, setCryptos] = useState<ICrypto[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isError, setIsError] = useState<string | null>(null);
   const [page, setPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(10);
   const [currency, setCurrency] = useState<string>('usd');
   const [sortOrder, setSortOrder] = useState<string>('desc');
-  const [columns, setColumns] = useState([
+  const [columns, setColumns] = useState<ColumnType[]>([
     {
       title: 'Name',
       dataIndex: 'image',
-      render: (theImageURL, data) => (
+      render: (theImageURL: string, data: ICrypto) => (
         <Flex gap="middle" align="center">
           <StyledImage src={theImageURL} alt={data.name} />
           <StyledText>{data.name}</StyledText>
@@ -72,9 +77,9 @@ const App: React.FC = () => {
       title: 'Current Price',
       dataIndex: 'current_price',
       key: 'current_price',
-      render: (price, data) => (
+      render: (price: number) => (
         <StyledText>
-          {data.current_price} {currency}
+          {price} {currency}
         </StyledText>
       ),
     },
@@ -82,7 +87,7 @@ const App: React.FC = () => {
       title: 'Circulating Supply',
       dataIndex: 'circulating_supply',
       key: 'circulating_supply',
-      render: (circulating_supply) => (
+      render: (circulating_supply: string) => (
         <StyledText>{circulating_supply}</StyledText>
       ),
     },
@@ -112,8 +117,9 @@ const App: React.FC = () => {
           setIsError('Unexpected response format');
         }
       } catch (error) {
-        setIsError(error.message);
-        console.error('Error fetching data:', error);
+        const errorMessage = (error as Error).message;
+        setIsError(errorMessage);
+        console.error('Error fetching data:', errorMessage);
       } finally {
         setIsLoading(false);
       }
@@ -130,9 +136,9 @@ const App: React.FC = () => {
       prevColumns[0],
       {
         ...prevColumns[1],
-        render: (price, data) => (
+        render: (price: number) => (
           <StyledText>
-            {data.current_price} {currency}
+            {price} {currency}
           </StyledText>
         ),
       },
@@ -149,7 +155,7 @@ const App: React.FC = () => {
   const handleSortOrderChange = (value: string) => {
     setSortOrder(value);
     setPage(1);
-    fetchCryptos(1, pageSize, currency, value);
+    fetchCryptos(page, pageSize, currency, value);
   };
 
   return (
@@ -157,7 +163,7 @@ const App: React.FC = () => {
       <Typography.Title style={{ fontSize: '24px', fontWeight: '400' }}>
         Coins & Markets
       </Typography.Title>
-      <Flex gap="large" horizontal="true">
+      <Flex gap="large">
         <Select
           defaultValue="usd"
           style={{ width: 200 }}
@@ -188,12 +194,12 @@ const App: React.FC = () => {
           onChange: (page, pageSize) => {
             setPageSize(pageSize);
             setPage(page);
-            fetchCryptos(page, pageSize);
+            fetchCryptos(page, pageSize, currency, sortOrder);
           },
           onShowSizeChange: (page, pageSize) => {
             setPageSize(pageSize);
             setPage(page);
-            fetchCryptos(page, pageSize, currency);
+            fetchCryptos(page, pageSize, currency, sortOrder);
           },
           pageSizeOptions: ['5', '10', '20', '50', '100'],
         }}
